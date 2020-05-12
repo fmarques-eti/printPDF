@@ -4,8 +4,8 @@ unit uPdfPrint;
 /// <e-mail>mauricio_sareto@hotmail.com</e-mail>
 
 ///  Esta unit tem por finalidade gerar relatorios para FMX Mobile, ela por ser
-///  editada e alterada, nao compartilhe esse arquivo sem a autorizaÁao do autor.
-///  O autor se reserva ao direito de receber todos os creditos pela sua criaÁ„o.
+///  editada e alterada, nao compartilhe esse arquivo sem a autoriza√ßao do autor.
+///  O autor se reserva ao direito de receber todos os creditos pela sua cria√ß√£o.
 
 interface
 
@@ -60,12 +60,12 @@ type
     Procedure Fechar;
   end;
 
-	//Essas contantes vao definir o espaÁamento entre as linha e entre cada palavra;
+	//Essas contantes vao definir o espa√ßamento entre as linha e entre cada palavra;
 	//Por exemplo:
-	//TamLinha È o espaÁamento de uma linha para outra
-	//TamColuna È o espaÁamento entre cada letra
-	//BordaSupInf È o tamanho da borda superior e da borda inferior
-	//BordaLefRig È o tamanho das bordas laterais
+	//TamLinha √© o espa√ßamento de uma linha para outra
+	//TamColuna √© o espa√ßamento entre cada letra
+	//BordaSupInf √© o tamanho da borda superior e da borda inferior
+	//BordaLefRig √© o tamanho das bordas laterais
 const
   TamLinha    : Integer = 15;
   TamColuna   : Integer = 7;
@@ -87,7 +87,8 @@ var
 begin
   JavaFile := TJFile.JavaClass.init(StringToJString(FileName));
   Result := TJnet_Uri.JavaClass.fromFile(JavaFile);
-end;
+end;
+
 procedure tPdfPrint.CompartilharPDF;
 Var
    IntentShare : JIntent;
@@ -98,7 +99,7 @@ Var
 Begin
   IntentShare := TJIntent.JavaClass.init(TJIntent.JavaClass.ACTION_SEND);
   Uris        := TJArrayList.Create;
-  Path:=TPath.Combine(TPath.GetSharedDocumentsPath, FNomeArq+'.pdf');
+  Path:=TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, FNomeArq+'.pdf');
   AttFile := TJFile.JavaClass.init(StringToJString(Path));
   Uri     := TJnet_Uri.JavaClass.fromFile(AttFile);
   Uris.add(0,Uri);
@@ -133,7 +134,7 @@ var
   FileName: String;
   OutputStream: JFileOutputStream;
 begin
-  FileName := TPath.Combine(TPath.GetSharedDocumentsPath, FNomeArq+'.pdf');
+  FileName := TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, FNomeArq+'.pdf');
   if(TFile.Exists(FileName))Then
     TFile.Delete(FileName);
   OutputStream := TJFileOutputStream.JavaClass.init
@@ -213,15 +214,15 @@ begin
 end;
 
 /// <summary>
-/// FunÁ„o respons·vel por imprimir o texto
+/// Fun√ß√£o respons√°vel por imprimir o texto
 /// </summary>
-/// <param name="Linha">Informa qual linha o texto passado dever· ser impresso</param>
-/// <param name="Coluna">Informa qual a coluna o texto passado dever· ser impresso</param>
+/// <param name="Linha">Informa qual linha o texto passado dever√° ser impresso</param>
+/// <param name="Coluna">Informa qual a coluna o texto passado dever√° ser impresso</param>
 /// <param name="Texto">Texto a ser impresso</param>
 /// <param name="TipoFonte">Estilo que deve ser usado para impressao do texto</param>
 /// <param name="Color">Cor da fonte a ser usada</param>
 /// <param name="TamFonte">Tamanho da fonte a ser usada</param>
-/// <param name="TpDirecao">Parametro para indicar a direÁao que o texto deve seguir</param>
+/// <param name="TpDirecao">Parametro para indicar a dire√ßao que o texto deve seguir</param>
 procedure tPdfPrint.ImpTexto(Linha, Coluna: Integer; Texto: String;
   TipoFonte: TTipoFonte; Color: TAlphaColor; TamFonte: Integer;
   TpDirecao: TTipoDirecao);
@@ -279,12 +280,16 @@ procedure tPdfPrint.VisualizarPDF();
 var
   Intent  : JIntent;
   Uri     : Jnet_Uri;
-  Path   : string;
+  Path,
+   Release: string;
 begin
-  if(TFile.Exists(TPath.Combine(TPath.GetSharedDocumentsPath, FNomeArq+'.pdf')))Then
+  if(TFile.Exists(TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, FNomeArq+'.pdf')))Then
   begin
-    Path:=TPath.Combine(TPath.GetSharedDocumentsPath, FNomeArq+'.pdf');
-    if(StrToInt(Copy(trim(JStringToString(TJBuild_VERSION.JavaClass.RELEASE)),0,2)) > 5) then
+    Path:=TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, FNomeArq+'.pdf');
+    Release := JStringToString(TJBuild_VERSION.JavaClass.RELEASE);
+    Release := Copy(Release, 1, pos('.', Release) -1);
+
+    if(StrToInt(Release) > 5) then
     begin
       intent := TJIntent.Create;
       intent.setAction(TJIntent.JavaClass.ACTION_VIEW);
@@ -297,7 +302,7 @@ begin
       OpenPDF(FNomeArq+'.pdf');
   end
   else
-    raise Exception.Create('Nenhum arquivo ou diretÛrio encontrado');
+    raise Exception.Create('Nenhum arquivo ou diret√≥rio encontrado');
 end;
 
 
@@ -311,7 +316,7 @@ begin
   if not AExternalURL then
   begin
     Filepath       := TPath.Combine(TPath.GetDocumentsPath      , APDFFileName);
-    SharedFilePath := TPath.Combine(TPath.GetSharedDocumentsPath, APDFFileName);
+    SharedFilePath := TPath.Combine(System.IOUtils.TPath.GetDocumentsPath, APDFFileName);
     if TFile.Exists(SharedFilePath) then
       TFile.Delete(SharedFilePath);
     TFile.Copy(Filepath, SharedFilePath);
@@ -325,6 +330,5 @@ begin
     Intent.setDataAndType(StrToJURI('file://' + SharedFilePath), StringToJString('application/pdf'));
   SharedActivity.startActivity(Intent);
 end;
-
 
 end.
